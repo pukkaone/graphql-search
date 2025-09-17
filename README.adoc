@@ -1,1 +1,178 @@
-= GraphQL API to OpenSearch
+= GraphQL Server For Search
+
+An example server implemented by a schema-first approach exposes a GraphQL API for search indices.
+Starting with a GraphQL schema that defines the structure of the documents in search indices,
+the server generates:
+
+  * Elasticsearch index mappings, and
+  * GraphQL schema with additional types needed to execute mutations and queries on search indices.
+
+
+== API Version
+
+An API version represents a set of types and operations defined by a GraphQL schema.
+The server exposes an HTTP endpoint for each API version at the URL paths:
+----
+{server.servlet.context-path}/graphql/{api-version}
+----
+
+== Proto Schema
+
+A proto schema is a GraphQL schema from which other schema are generated.
+The `src/main/resources/search/` directory contains a subdirectory for each API version.
+The schema files under a API version subdirectory define the proto schema for that API version.
+
+
+=== Directives
+
+Directives provide information about how to generate the other schema.
+
+The `@document` directive indicates the annotated object type is the root object of the document to
+be put in a search index.
+[source,graphql]
+----
+type Transaction @document {
+----
+
+The `@id` directive indicates the annotated field uniquely identifies the document in a search
+index.
+This is the document ID used to put a document into a search index.
+[source,graphql]
+----
+  transaction_urn: ID! @id
+----
+
+The `@searchable` directive indicates the annotated field can be queried in a search.
+[source,graphql]
+----
+  city: String! @searchable
+----
+
+By default, the server translates the `ID` scalar type to the `"keyword"` mapping type, and the
+`String` scalar type to the `"text"` mapping type.
+The `type` argument can change the mapping type.
+----
+  product_code: String! @searchable(type: "keyword")
+----
+
+By default, the server translates an object type definition to a mapping with type `"object"`.
+The `type` argument can change the mapping type to `"nested"`.
+[source,graphql]
+----
+type Listing @searchable(type: "nested") {
+----
+
+
+== Search Schema
+
+The search schema is generated from the proto schema.
+This is the schema exposed by the GraphQL API.
+
+
+=== Create an index and assign an alias to it
+[source,graphql]
+----
+mutation {
+  createIndexWithAlias(
+      type: "Transaction"
+      index: "transaction-1"
+      alias: "transaction-write"
+  )
+}
+----
+
+
+=== Put a document into a search index
+[source,graphql]
+----
+mutation put {
+  putTransaction(
+      index: "transaction-write"
+      documents: {
+        transaction_urn: "transaction:1"
+        listing: {
+          listing_urn: "listing:2"
+          description: "description"
+          reserve_price: 2
+          valuation_price: 1
+        }
+        property: {
+          property_urn: "property:3"
+          location: {
+            address: {
+              line: "9641 Sunset Blvd"
+              city: "Beverly Hills"
+              state: "CA"
+              postal_code: "90210"
+              country: "US"
+            }
+            position: {
+              lat: 34.08492556624647
+              lon: -118.4135163566971
+            }
+          }
+          bathrooms: 2
+          bedrooms: 3
+        }
+      }
+  )
+}
+----
+
+
+=== Search for documents
+[source,graphql]
+----
+query search {
+  transactionConnection(
+      index: "transaction"
+      filter: {
+        property: {
+          location: {
+            address: {
+              state: {
+                eq: "CA"
+              }
+            }
+          }
+        }
+      }
+      sort: {
+        field: "property.bedrooms"
+        direction: ASC
+      }
+  ) {
+    edges {
+      node {
+        transaction_urn
+      }
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+    }
+  }
+}
+----
+
+
+==== Filter Operators
+
+The following filter operators are supported:
+[cols="1,3"]
+|===
+| Operator | Description
+
+| `and:` | All of the conditions must be true
+| `or:` | At least one of the conditions must be true
+| `not:` | All of the conditions must be false
+| `contains:` | A term analyzed from the field value is a term in the list
+| `eq:` | Equal to
+| `in:` | The field value is a value in the list
+| `gt:` | Greater than
+| `gte:` | Greater than or equal to
+| `lt:` | Less than
+| `lte:` | Less than or equal to
+| `exists:` | Whether the field has a value
+| `geo_distance:` | The GeoPoint field value is within the given radius from the given center
+|===
