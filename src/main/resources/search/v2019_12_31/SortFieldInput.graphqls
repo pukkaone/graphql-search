@@ -1,0 +1,21 @@
+enum SortDirection {
+  ASC
+  DESC
+}
+
+input SortGeoDistanceInput {
+  center: GeoPointInput!
+}
+
+input SortScript {
+  name: String!
+  type: String!
+  arguments: String
+}
+
+input SortFieldInput {
+  field: String
+  geo_distance: SortGeoDistanceInput
+  script: SortScript
+  direction: SortDirection
+}

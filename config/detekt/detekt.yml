@@ -1,0 +1,94 @@
+comments:
+  OutdatedDocumentation:
+    active: true
+    allowParamOnConstructorProperties: true
+  UndocumentedPublicClass:
+    active: true
+    ignoreAnnotated:
+      - Api
+      - ApiModel
+    ignoreDefaultCompanionObject: true
+  UndocumentedPublicFunction:
+    active: true
+    ignoreAnnotated:
+      - ApiOperation
+      - AssertFalse
+      - AssertTrue
+      - Bean
+      - KafkaListener
+      - Repository
+
+complexity:
+  LongMethod:
+    threshold: 100
+  LongParameterList:
+    constructorThreshold: 10
+    functionThreshold: 10
+  NestedBlockDepth:
+    threshold: 10
+  TooManyFunctions:
+    thresholdInClasses: 100
+    thresholdInInterfaces: 100
+    thresholdInObjects: 100
+
+config:
+  validation: true
+
+naming:
+  ObjectPropertyNaming:
+    constantPattern: '[A-Z][_A-Z0-9]*'
+
+style:
+  BracesOnIfStatements:
+    active: true
+    multiLine: always
+    singleLine: consistent
+  ForbiddenAnnotation:
+    active: true
+  ForbiddenComment:
+    comments:
+      - reason: Documentation must not be blank
+        value: '\A\s*\Z'
+  ForbiddenImport:
+    active: true
+    forbiddenPatterns: '.*\.shaded\..*'
+    imports:
+      - value: org.junit.Assert
+        reason: import org.assertj.core.api.Assertions.assertThat instead
+      - value: org.junit.Test
+        reason: import org.junit.jupiter.api.Test instead
+      - value: org.mockito.ArgumentMatchers.any
+        reason: import org.mockito.kotlin.any instead
+      - value: org.mockito.BDDMockito.given
+        reason: import org.mockito.kotlin.given instead
+      - value: org.mockito.Mockito.when
+        reason: import org.mockito.kotlin.given instead
+      - value: org.mockito.kotlin.whenever
+        reason: import org.mockito.kotlin.given instead
+      - value: org.springframework.retry.annotation.CircuitBreaker
+        reason: import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker instead
+      - value: org.springframework.retry.annotation.Retryable
+        reason: import io.github.resilience4j.retry.annotation.Retry instead
+  ForbiddenSuppress:
+    active: true
+    rules:
+      - UnsafeCallOnNullableType
+  MandatoryBracesLoops:
+    active: true
+  ReturnCount:
+    active: false
+  ThrowsCount:
+    max: 10
+  UnnecessaryAbstractClass:
+    active: false
+  UnusedImports:
+    active: true
+  UtilityClassWithPublicConstructor:
+    ignoreAnnotated:
+      - AutoConfiguration
+      - Configuration
+      - TestConfiguration
+  VarCouldBeVal:
+    ignoreLateinitVar: true
+  WildcardImport:
+    excludeImports: []

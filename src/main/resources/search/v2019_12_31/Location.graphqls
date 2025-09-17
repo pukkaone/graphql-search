@@ -1,0 +1,17 @@
+type Address {
+  line: [String!]! @searchable
+  city: String! @searchable
+  state: String! @searchable(type: "keyword")
+  postal_code: String! @searchable
+  country: String! @searchable(type: "keyword")
+}
+
+type GeoPoint {
+  lat: Float!
+  lon: Float!
+}
+
+type Location {
+  address: Address! @searchable
+  position: GeoPoint! @searchable
+}

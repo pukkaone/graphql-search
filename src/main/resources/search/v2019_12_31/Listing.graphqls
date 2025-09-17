@@ -1,0 +1,6 @@
+type Listing {
+  listing_urn: ID! @searchable
+  description: String! @searchable
+  reserve_price: BigDecimal!
+  valuation_price: BigDecimal! @searchable
+}

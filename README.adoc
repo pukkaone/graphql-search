@@ -1,1 +1,163 @@
-= GraphQL API to OpenSearch
+= GraphQL API For Search
+
+An example server implemented by a schema-first approach exposes a GraphQL API for search indices.
+Starting with a GraphQL schema that defines the structure of the documents in the search indices,
+the server generates:
+
+  * Elasticsearch index mappings, and
+  * GraphQL schema to create indices, put documents into indices, and search for documents.
+
+
+== API Version
+
+An API version represents a set of types and operations defined by a GraphQL schema.
+The server exposes an HTTP endpoint for each API version at the URL paths:
+----
+{server.servlet.context-path}/graphql/{api-version}
+----
+
+== Proto Schema
+
+A proto schema is a GraphQL schema from which other schema are generated.
+The `src/main/resources/schema/` directory contains a subdirectory for each API version.
+The schema files under the API version subdirectory define the proto schema for that API version.
+
+
+=== Custom Directives
+
+Directives provide information about how to generate the other schema.
+
+The `@document` directive indicates that the annotated object type is a document type to be stored
+in a search index.
+[source,graphql]
+----
+type Transaction @document {
+----
+
+The `@id` directive indicates that the annotated field uniquely identifies the document in a search
+index.
+[source,graphql]
+----
+  transaction_urn: ID! @id
+----
+
+The `@searchable` directive indicates that the annotated field can be queried in a search for
+documents.
+[source,graphql]
+----
+  city: String! @searchable
+----
+
+
+== Search Schema
+
+The search schema is generated from the proto schema.
+This is the schema exposed by the GraphQL API.
+
+
+=== Create an index and assign an alias to it
+[source,graphql]
+----
+mutation {
+  createIndexWithAlias(
+      type: "Transaction"
+      index: "transaction-1"
+      alias: "transaction-write"
+  )
+}
+----
+
+
+=== Put a document into a search index
+[source,graphql]
+----
+mutation put {
+  putTransaction(
+      index: "transaction-write"
+      documents: {
+        transaction_urn: "transaction:1"
+        listing: {
+          listing_urn: "listing:2"
+          description: "description"
+          reserve_price: 2
+          valuation_price: 1
+        }
+        property: {
+          property_urn: "property:3"
+          location: {
+            address: {
+              line: "9641 Sunset Blvd"
+              city: "Beverly Hills"
+              state: "CA"
+              postal_code: "90210"
+              country: "US"
+            }
+            position: {
+              lat: 34.08492556624647
+              lon: -118.4135163566971
+            }
+          }
+          bathrooms: 2
+          bedrooms: 3
+        }
+      }
+  )
+}
+----
+
+
+=== Search for documents
+[source,graphql]
+----
+query search {
+  transactionConnection(
+      index: "transaction"
+      filter: {
+        property: {
+          location: {
+            address: {
+              state: {
+                eq: "CA"
+              }
+            }
+          }
+        }
+      }
+      sort: {
+        field: "property.bedrooms"
+        direction: ASC
+      }
+  ) {
+    edges {
+      node {
+        transaction_urn
+      }
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+    }
+  }
+}
+----
+
+
+==== Filter Operators
+
+The following filter operators are supported:
+[cols="1,3"]
+|===
+| Operator | Description
+
+| `and:` | All of the conditions in the condition list must be true
+| `or:` | At least one of the conditions must be true
+| `not:` | All of the conditions in the condition list must be false
+| `contains:` | A term analyzed from the field value is a term in the list
+| `eq:` | Equal to
+| `in:` | The field value is a value in the list
+| `gt:` | Greater than
+| `gte:` | Greater than or equal to
+| `lt:` | Less than
+| `lte:` | Less than or equal to
+| `exists:` | Whether the field has a value
+|===

@@ -1,0 +1,13 @@
+type Mutation {
+
+  createIndexWithAlias(
+      type: String!
+      index: String!
+      alias: String!
+  ): Boolean!
+
+  assignAlias(
+      index: String!
+      alias: String!
+  ): Boolean!
+}

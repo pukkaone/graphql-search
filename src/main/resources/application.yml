@@ -1,0 +1,11 @@
+search:
+  api-versions:
+    - v2019_12_31
+
+spring:
+  cloud.config.enabled: false
+  graphql:
+    graphiql:
+      enabled: true
+    http.path: /graphql/**
+  main.banner-mode: 'off'
