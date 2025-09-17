@@ -1,0 +1,4 @@
+type WithShort @document {
+  id: ID! @id
+  field: Short @searchable
+}

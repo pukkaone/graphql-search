@@ -1,0 +1,4 @@
+type WithFloat @document {
+  id: ID! @id
+  field: Float @searchable
+}

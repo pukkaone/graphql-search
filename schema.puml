@@ -1,0 +1,11 @@
+@startuml
+hide empty members
+
+object "Proto schema" as ProtoSchema
+object "Elasticsearch mapping" as Mapping
+object "GraphQL schema for search" as SearchSchema
+
+ProtoSchema --> Mapping: generate
+ProtoSchema --> SearchSchema: generate
+
+@enduml
