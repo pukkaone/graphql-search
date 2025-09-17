@@ -1,0 +1,4 @@
+type WithLong @document {
+  id: ID! @id
+  field: Long @searchable
+}

@@ -1,0 +1,4 @@
+type WithString @document {
+  id: ID! @id
+  field: String @searchable
+}
