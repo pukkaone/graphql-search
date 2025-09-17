@@ -1,0 +1,4 @@
+type WithByte @document {
+  id: ID! @id
+  field: Byte @searchable
+}
