@@ -1,0 +1,7 @@
+{
+  "settings": {
+    "auto_expand_replicas": "0-all",
+    "number_of_replicas": 2,
+    "number_of_shards": 1
+  }
+}
