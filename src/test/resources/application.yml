@@ -1,0 +1,10 @@
+search:
+  api-versions:
+    - v2019_12_31
+  write.refresh: IMMEDIATE
+
+spring:
+  cloud.config.enabled: false
+  graphql:
+    http.path: /graphql/**
+  main.banner-mode: 'off'

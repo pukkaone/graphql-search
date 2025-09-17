@@ -1,0 +1,5 @@
+type Transaction @document {
+  transaction_urn: ID! @id @searchable
+  listing: Listing
+  property: Property
+}

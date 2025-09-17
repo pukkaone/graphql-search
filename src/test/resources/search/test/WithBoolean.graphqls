@@ -1,0 +1,4 @@
+type WithBoolean @document {
+  id: ID! @id
+  field: Boolean @searchable
+}
