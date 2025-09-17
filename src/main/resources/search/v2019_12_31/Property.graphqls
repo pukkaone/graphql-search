@@ -1,0 +1,6 @@
+type Property {
+  property_urn: ID! @searchable
+  location: Location!
+  bathrooms: Float! @searchable
+  bedrooms: Int! @searchable
+}
